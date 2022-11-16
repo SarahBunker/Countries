@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -70,37 +71,40 @@ function Countries({filteredCountries, filterFunc}) {
 function App() {
   const [newFilter, setNewFilter] = useState('');
   const [countriesList, setCountriesList] = useState([]);
-  const [filteredCountries, setFilteredCountries] = useState([]);
-
-  const handleFilterChange = (event) => {
-    setNewFilter(event.target.value);
-    getFilteredCountries(event);
-  }
+  let filteredCountries = [];
 
   const getCountries = () => {
     axios.get("https://restcountries.com/v3.1/all")
       .then(response => setCountriesList(response.data));
   }
+  useEffect(getCountries, []);
 
-  function getFilteredCountries(event) {
-    let filteredCountriesByName = countriesList.filter( country => {
+  const handleFilterChange = (event) => {
+    console.log("Current Value", event.target.value);
+    setNewFilter(event.target.value);
+  }
+
+  function getFilteredCountries() {
+    filteredCountries = countriesList.filter( country => {
       let lowerCaseName = country.name.official.toLowerCase();
       let lowerCaseFilter = newFilter.toLowerCase();
       return lowerCaseName.includes(lowerCaseFilter);
     })
-    setFilteredCountries(filteredCountriesByName);
   }
 
-  useEffect(getCountries, []);
+  getFilteredCountries();
+  console.log("Filter", newFilter)
 
   return (
     <div>
+      <React.StrictMode>
       <div>Find Countries
         <input value={newFilter} onChange={handleFilterChange}/>
       </div>
       <Countries filteredCountries={filteredCountries} filterFunc={setNewFilter}/>
       <div>debug: {countriesList.length} </div>
       <div>debug: {filteredCountries.length} </div>
+      </React.StrictMode>
     </div>
   );
 }
